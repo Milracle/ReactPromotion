@@ -2,6 +2,11 @@
 
 Basic ReactJs Web app which shows promotions for new customers and all promotions.
 
+<p>
+  <img src="img_all.png" width="350" title="All Promotions">
+  <img src="img_customer.png" width="150" alt="New Customer Promotions">
+</p>
+
 ## Library Used
 
 - Bootstrap
