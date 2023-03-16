@@ -14,7 +14,10 @@ export default function Home() {
   // Data helper
 
   useEffect(() => {
-    if (dataList.length === 0) fatchdataList();
+    if (dataList.length === 0)
+      if (localStorage.getItem(STORAGE.PROMOTIONS))
+        setDataList(JSON.parse(localStorage.getItem(STORAGE.PROMOTIONS)));
+      else fatchdataList();
   }, [dataList]);
 
   const fatchdataList = async () => {
@@ -22,6 +25,7 @@ export default function Home() {
     const { data } = await Axios.get(Promotions.Select, obj);
     if (data) {
       const dataList = data.sort((a, b) => a.sequence - b.sequence);
+      localStorage.setItem(STORAGE.PROMOTIONS, JSON.stringify(dataList));
       setDataList(dataList);
     }
   };
