@@ -46,3 +46,14 @@
     padding-inline: 10px;
 }
   
+.btnSignin{
+    background: #b9b9e0;
+    border-color: #fff;
+    color: #000;
+}
+
+.btnJoin{
+    background: #fff;
+    border-color: grey;
+    color: #000;
+}

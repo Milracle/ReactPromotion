@@ -106,14 +106,16 @@ export default function Home() {
                     <Image src={e.heroImageUrl} height="auto" width="100%" />
                   </Col>
                   <Col className="info">
-                    <h1>{e.name}</h1>
+                    <h2>{e.name}</h2>
                     <p>{e.description}</p>
                     <Row className="buttonRow">
-                      <Button className="col-5">
+                      <Button className="col-5 btnTerms">
                         {e.termsAndConditionsButtonText}
                       </Button>
                       <Col className="col-2"></Col>
-                      <Button className="col-5">{e.joinNowButtonText}</Button>
+                      <Button className="col-5 btnJoin">
+                        {e.joinNowButtonText}
+                      </Button>
                     </Row>
                   </Col>
                 </Row>
