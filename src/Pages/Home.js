@@ -65,6 +65,31 @@ export default function Home() {
             ))}
           </>
         )}
+
+        {activeTabIndex === 1 && (
+          <>
+            {dataList
+              .filter((e) => e.onlyNewCustomers)
+              .map((e, index) => (
+                <Row className="m-4 promotionContainer" key={index}>
+                  <Col md={6}>
+                    <Image src={e.heroImageUrl} height="auto" width="100%" />
+                  </Col>
+                  <Col className="info">
+                    <h1>{e.name}</h1>
+                    <p>{e.description}</p>
+                    <Row className="buttonRow">
+                      <Button className="col-5">
+                        {e.termsAndConditionsButtonText}
+                      </Button>
+                      <Col className="col-2"></Col>
+                      <Button className="col-5">{e.joinNowButtonText}</Button>
+                    </Row>
+                  </Col>
+                </Row>
+              ))}
+          </>
+        )}
       </Container>
     </>
   );
