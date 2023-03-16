@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Container, Row, Col, Button, Image } from "react-bootstrap";
 import Axios from "axios";
 import { API_URLS } from "../API/API";
-import { strings } from "../Helper/Utils";
+import { STORAGE, strings } from "../Helper/Utils";
 import "./Home.css";
 const { Promotions } = API_URLS;
 
@@ -10,6 +10,8 @@ export default function Home() {
   const [dataList, setDataList] = useState([]);
   const [activeTabIndex, setActiveTabIndex] = useState(0);
   const tabs = [strings.ALL_PRMOTIONS, strings.NEW_CUSTOMERS];
+  const dragItem = useRef();
+  const dragOverItem = useRef();
 
   // Data helper
 
@@ -28,6 +30,29 @@ export default function Home() {
       localStorage.setItem(STORAGE.PROMOTIONS, JSON.stringify(dataList));
       setDataList(dataList);
     }
+  };
+
+  // Drag and Drop Helpers
+
+  const dragStart = (e, position) => {
+    dragItem.current = position;
+  };
+
+  const dragEnter = (e, position) => {
+    dragOverItem.current = position;
+  };
+
+  const drop = (e) => {
+    const copyListItems = [...dataList];
+    const dragItemContent = copyListItems[dragItem.current];
+    copyListItems.splice(dragItem.current, 1);
+    copyListItems.splice(dragOverItem.current, 0, dragItemContent);
+
+    for (let i = 0; i < copyListItems.length; i++)
+      copyListItems[i].sequence = i;
+
+    setDataList(copyListItems);
+    localStorage.setItem(STORAGE.PROMOTIONS, JSON.stringify(copyListItems));
   };
 
   return (
@@ -54,6 +79,7 @@ export default function Home() {
             {dataList.map((e, index) => (
               <Row
                 className="m-4"
+                draggable
                 onDragStart={(e) => dragStart(e, index)}
                 onDragEnter={(e) => dragEnter(e, index)}
                 onDragEnd={drop}
