@@ -1,0 +1,48 @@
+ 
+.tabItem {
+    cursor: pointer;
+    border: 1px solid #b9b9e0;
+    border-radius: 10px;
+    height: 50px;
+    transition: 1s ease;
+    box-shadow: rgba(17, 12, 46, 0.15) 0px 48px 100px 0px;
+    text-align: center;
+    font-size: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;    
+}
+
+.tabSelect{
+    background-color: #b9b9e0;
+}
+
+.subDiv {
+    transition: 1s ease;
+    cursor: pointer;
+    user-select: none;
+}
+
+.promotionTitle{
+    font-size: large;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.promotionContainer{
+    background-color: whitesmoke;
+    padding: 10px;
+    border: 1px solid #b9b9e0;
+    border-radius: 5px;
+}
+
+.info {
+    padding-inline: 30px;
+    padding-block: 20px;
+}
+
+.buttonRow {
+    margin-top: 5px;
+    padding-inline: 10px;
+}
+  
