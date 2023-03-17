@@ -4,31 +4,31 @@ import Axios from "axios";
 import { API_URLS } from "../API/API";
 import { STORAGE, strings } from "../Helper/Utils";
 import "./Home.css";
+
 const { Promotions } = API_URLS;
 
 export default function Home() {
-  const [dataList, setDataList] = useState([]);
+  const [promotions, setPromotions] = useState([]);
   const [activeTabIndex, setActiveTabIndex] = useState(0);
-  const tabs = [strings.ALL_PRMOTIONS, strings.NEW_CUSTOMERS];
   const dragItem = useRef();
   const dragOverItem = useRef();
 
   // Data helper
 
   useEffect(() => {
-    if (dataList.length === 0)
+    if (promotions.length === 0)
       if (localStorage.getItem(STORAGE.PROMOTIONS))
-        setDataList(JSON.parse(localStorage.getItem(STORAGE.PROMOTIONS)));
-      else fatchdataList();
-  }, [dataList]);
+        // Check and set promotions from local storage if available
+        setPromotions(JSON.parse(localStorage.getItem(STORAGE.PROMOTIONS)));
+      else fetchpromotions(); // Call api to get promotions
+  }, [promotions]);
 
-  const fatchdataList = async () => {
-    let obj = {};
-    const { data } = await Axios.get(Promotions.Select, obj);
+  const fetchpromotions = async () => {
+    const { data } = await Axios.get(Promotions.Select);
     if (data) {
-      const dataList = data.sort((a, b) => a.sequence - b.sequence);
-      localStorage.setItem(STORAGE.PROMOTIONS, JSON.stringify(dataList));
-      setDataList(dataList);
+      const dbPromotions = data.sort((a, b) => a.sequence - b.sequence);
+      setPromotions(dbPromotions);
+      localStorage.setItem(STORAGE.PROMOTIONS, JSON.stringify(dbPromotions));
     }
   };
 
@@ -43,83 +43,101 @@ export default function Home() {
   };
 
   const drop = (e) => {
-    const copyListItems = [...dataList];
-    const dragItemContent = copyListItems[dragItem.current];
-    copyListItems.splice(dragItem.current, 1);
-    copyListItems.splice(dragOverItem.current, 0, dragItemContent);
+    const copyPromotions = [...promotions];
+    const dragItemContent = copyPromotions[dragItem.current];
+    copyPromotions.splice(dragItem.current, 1);
+    copyPromotions.splice(dragOverItem.current, 0, dragItemContent);
 
-    for (let i = 0; i < copyListItems.length; i++)
-      copyListItems[i].sequence = i;
+    for (let i = 0; i < copyPromotions.length; i++)
+      copyPromotions[i].sequence = i;
 
-    setDataList(copyListItems);
-    localStorage.setItem(STORAGE.PROMOTIONS, JSON.stringify(copyListItems));
+    setPromotions(copyPromotions);
+    localStorage.setItem(STORAGE.PROMOTIONS, JSON.stringify(copyPromotions));
+  };
+
+  // Render Customer Promotions Tab Row
+
+  const renderCustomerPromotionRow = (promotion, index) => {
+    return (
+      <Row className="m-4 promotionContainer" key={index}>
+        <Col md={6}>
+          <Image src={promotion.heroImageUrl} height="auto" width="100%" />
+        </Col>
+        <Col className="info">
+          <h2>{promotion.name}</h2>
+          <p>{promotion.description}</p>
+          <Row className="buttonRow">
+            <Button className="col-5 btnTerms">
+              {promotion.termsAndConditionsButtonText}
+            </Button>
+            <Col className="col-2"></Col>
+            <Button className="col-5 btnJoin">
+              {promotion.joinNowButtonText}
+            </Button>
+          </Row>
+        </Col>
+      </Row>
+    );
+  };
+
+  // Render All Promotions Tab Row
+
+  const renderAllPromotionRow = (promotion, index) => {
+    return (
+      <Row
+        className="m-4"
+        draggable
+        onDragStart={(e) => dragStart(e, index)}
+        onDragEnter={(e) => dragEnter(e, index)}
+        onDragEnd={drop}
+        key={index}
+      >
+        <Col className="promotionContainer">
+          <div className="promotionTitle">{promotion.name}</div>
+          <div className="subDiv">
+            <p className="mt-3">{promotion.description}</p>
+          </div>
+        </Col>
+      </Row>
+    );
   };
 
   return (
     <>
       <Container>
         <Row className="mt-3">
-          {tabs.map((e, index) => (
-            <Col key={index}>
-              <div
-                className={`tabItem ${
-                  activeTabIndex === index ? "tabSelect" : ""
-                }`}
-                onClick={() => setActiveTabIndex(index)}
-              >
-                {e}
-              </div>
-            </Col>
-          ))}
+          {[strings.ALL_PRMOTIONS, strings.NEW_CUSTOMERS].map(
+            (title, index) => (
+              <Col key={index}>
+                <div
+                  className={`tabItem ${
+                    activeTabIndex === index ? "tabSelect" : ""
+                  }`}
+                  onClick={() => setActiveTabIndex(index)}
+                >
+                  {title}
+                </div>
+              </Col>
+            )
+          )}
         </Row>
       </Container>
       <Container className="mb-4">
         {activeTabIndex === 0 && (
           <>
-            {dataList.map((e, index) => (
-              <Row
-                className="m-4"
-                draggable
-                onDragStart={(e) => dragStart(e, index)}
-                onDragEnter={(e) => dragEnter(e, index)}
-                onDragEnd={drop}
-                key={index}
-              >
-                <Col className="promotionContainer">
-                  <div className="promotionTitle">{e.name}</div>
-                  <div className="subDiv">
-                    <p className="mt-3">{e.description}</p>
-                  </div>
-                </Col>
-              </Row>
-            ))}
+            {promotions.map((promotion, index) =>
+              renderAllPromotionRow(promotion, index)
+            )}
           </>
         )}
 
         {activeTabIndex === 1 && (
           <>
-            {dataList
+            {promotions
               .filter((e) => e.onlyNewCustomers)
-              .map((e, index) => (
-                <Row className="m-4 promotionContainer" key={index}>
-                  <Col md={6}>
-                    <Image src={e.heroImageUrl} height="auto" width="100%" />
-                  </Col>
-                  <Col className="info">
-                    <h2>{e.name}</h2>
-                    <p>{e.description}</p>
-                    <Row className="buttonRow">
-                      <Button className="col-5 btnTerms">
-                        {e.termsAndConditionsButtonText}
-                      </Button>
-                      <Col className="col-2"></Col>
-                      <Button className="col-5 btnJoin">
-                        {e.joinNowButtonText}
-                      </Button>
-                    </Row>
-                  </Col>
-                </Row>
-              ))}
+              .map((promotion, index) =>
+                renderCustomerPromotionRow(promotion, index)
+              )}
           </>
         )}
       </Container>
