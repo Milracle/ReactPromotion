@@ -3,6 +3,11 @@ export const STORAGE = {
 };
 
 export const strings = {
-  ALL_PRMOTIONS: "All Promotions",
-  NEW_CUSTOMERS: "New Customers",
+  Home: {
+    All_Promotions: "All Promotions",
+    New_Customers: "New Customers",
+  },
+  Error: {
+    Reachability: "Unable to fetch data",
+  },
 };

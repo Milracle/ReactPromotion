@@ -1,35 +1,35 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Container, Row, Col, Button, Image } from "react-bootstrap";
-import Axios from "axios";
-import { API_URLS } from "../API/API";
 import { STORAGE, strings } from "../Helper/Utils";
+import { getPromotions } from "../Services/DataService";
+import { localStorageHelper } from "../Helper/LocalStorage";
 import "./Home.css";
 
-const { Promotions } = API_URLS;
-
 export default function Home() {
+  const Tabs = {
+    All: strings.Home.All_Promotions,
+    Customer: strings.Home.New_Customers,
+  };
   const [promotions, setPromotions] = useState([]);
-  const [activeTabIndex, setActiveTabIndex] = useState(0);
+  const [activeTab, setActiveTab] = useState(Tabs.All);
   const dragItem = useRef();
   const dragOverItem = useRef();
 
-  // Data helper
-
   useEffect(() => {
-    if (promotions.length === 0)
-      if (localStorage.getItem(STORAGE.PROMOTIONS))
-        // Check and set promotions from local storage if available
-        setPromotions(JSON.parse(localStorage.getItem(STORAGE.PROMOTIONS)));
-      else fetchpromotions(); // Call api to get promotions
-  }, [promotions]);
+    getPromotions().then(
+      function (retrivedPromotions) {
+        setPromotions(retrivedPromotions);
+      },
+      function (error) {
+        alert(error.message);
+      }
+    );
+  }, []);
 
-  const fetchpromotions = async () => {
-    const { data } = await Axios.get(Promotions.Select);
-    if (data) {
-      const dbPromotions = data.sort((a, b) => a.sequence - b.sequence);
-      setPromotions(dbPromotions);
-      localStorage.setItem(STORAGE.PROMOTIONS, JSON.stringify(dbPromotions));
-    }
+  const getPomotionsForActiveTab = () => {
+    return activeTab === Tabs.All
+      ? promotions
+      : promotions.filter((e) => e.onlyNewCustomers);
   };
 
   // Drag and Drop Helpers
@@ -52,14 +52,14 @@ export default function Home() {
       copyPromotions[i].sequence = i;
 
     setPromotions(copyPromotions);
-    localStorage.setItem(STORAGE.PROMOTIONS, JSON.stringify(copyPromotions));
+    localStorageHelper.store(STORAGE.PROMOTIONS, copyPromotions);
   };
 
   // Render Customer Promotions Tab Row
 
   const renderCustomerPromotionRow = (promotion, index) => {
     return (
-      <Row className="m-4 promotionContainer" key={index}>
+      <Row className="m-4 promotionContainer" key={promotion.id}>
         <Col md={6}>
           <Image src={promotion.heroImageUrl} height="auto" width="100%" />
         </Col>
@@ -106,40 +106,26 @@ export default function Home() {
     <>
       <Container>
         <Row className="mt-3">
-          {[strings.ALL_PRMOTIONS, strings.NEW_CUSTOMERS].map(
-            (title, index) => (
-              <Col key={index}>
-                <div
-                  className={`tabItem ${
-                    activeTabIndex === index ? "tabSelect" : ""
-                  }`}
-                  onClick={() => setActiveTabIndex(index)}
-                >
-                  {title}
-                </div>
-              </Col>
-            )
-          )}
+          {[Tabs.All, Tabs.Customer].map((title, index) => (
+            <Col key={index}>
+              <div
+                className={`tabItem ${activeTab === title ? "tabSelect" : ""}`}
+                onClick={() => {
+                  setActiveTab(title);
+                }}
+              >
+                {title}
+              </div>
+            </Col>
+          ))}
         </Row>
       </Container>
       <Container className="mb-4">
-        {activeTabIndex === 0 && (
-          <>
-            {promotions.map((promotion, index) =>
-              renderAllPromotionRow(promotion, index)
-            )}
-          </>
-        )}
-
-        {activeTabIndex === 1 && (
-          <>
-            {promotions
-              .filter((e) => e.onlyNewCustomers)
-              .map((promotion, index) =>
-                renderCustomerPromotionRow(promotion, index)
-              )}
-          </>
-        )}
+        {getPomotionsForActiveTab().map((promotion, index) => {
+          if (activeTab === Tabs.All)
+            return renderAllPromotionRow(promotion, index);
+          else return renderCustomerPromotionRow(promotion, index);
+        })}
       </Container>
     </>
   );
